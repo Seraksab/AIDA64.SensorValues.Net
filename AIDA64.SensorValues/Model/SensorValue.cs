@@ -1,4 +1,4 @@
-﻿namespace AIDA64;
+﻿namespace AIDA64.Model;
 
 /// <summary>
 /// A single AIDA64 sensor value
@@ -11,5 +11,5 @@ public readonly record struct SensorValue(
   string Id,
   string Label,
   string Value,
-  string Type
+  SensorType Type
 );

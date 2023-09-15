@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDA64.SharedMemoryReader", "AIDA64.SharedMemoryReader\AIDA64.SharedMemoryReader.csproj", "{B9ADE537-6F10-41C9-848F-1EED83E5F729}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDA64.SensorValues", "AIDA64.SensorValues\AIDA64.SensorValues.csproj", "{B9ADE537-6F10-41C9-848F-1EED83E5F729}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{800039C6-CB46-48BA-9062-136940F9712C}"
 EndProject

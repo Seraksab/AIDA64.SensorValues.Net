@@ -24,11 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AIDA64.SharedMemoryReader\AIDA64.SharedMemoryReader.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\AIDA64.SharedMemoryReader\AIDA64.SharedMemoryReader.csproj" />
+      <ProjectReference Include="..\AIDA64.SensorValues\AIDA64.SensorValues.csproj" />
     </ItemGroup>
 
 </Project>
