@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Title>AIDA64 Shared Memory Reader</Title>
+        <Description>Reads sensor values shared by AIDA64 via shared memory</Description>
+        <Authors>Manfred Graf</Authors>
+        <Copyright>© 2023 Manfred Graf</Copyright>
+        <IsPackable>true</IsPackable>
+        <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+        <LangVersion>11</LangVersion>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+        <RootNamespace>AIDA64.SharedMemoryReader</RootNamespace>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageId>AIDA64.SharedMemoryReader</PackageId>
+        <AssemblyName>AIDA64.SharedMemoryReader</AssemblyName>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <RepositoryUrl>https://github.com/Seraksab/AIDA64.SharedMemoryReader</RepositoryUrl>
+        <PackageTags>Aida,AIDA64,AIDA64 Extreme</PackageTags>
+    </PropertyGroup>
+
+</Project>
