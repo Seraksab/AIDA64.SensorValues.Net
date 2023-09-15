@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Xml;
@@ -17,8 +18,11 @@ public class SharedMemoryReader : ISensorValueReader
   /// <inheritdoc />
   public IEnumerable<SensorValue> Read()
   {
+    var content = ReadSharedMemory();
+    if (string.IsNullOrEmpty(content)) yield break;
+
     var xmlDoc = new XmlDocument();
-    xmlDoc.LoadXml($"<root>{ReadSharedMemory()}</root>");
+    xmlDoc.LoadXml($"<root>{content}</root>");
 
     if (xmlDoc.FirstChild == null) yield break;
 
@@ -38,12 +42,19 @@ public class SharedMemoryReader : ISensorValueReader
 
   private static string ReadSharedMemory()
   {
-    using var mmf = MemoryMappedFile.OpenExisting(SharedMemoryFile, MemoryMappedFileRights.Read);
-    using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
-    Span<byte> bytes = stackalloc byte[(int)accessor.Capacity];
-    accessor.SafeMemoryMappedViewHandle.ReadSpan(0, bytes);
-    var endIdx = bytes.IndexOf(Convert.ToByte('\x00'));
-    return Encoding.ASCII.GetString(bytes[..endIdx]);
+    try
+    {
+      using var mmf = MemoryMappedFile.OpenExisting(SharedMemoryFile, MemoryMappedFileRights.Read);
+      using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
+      Span<byte> bytes = stackalloc byte[(int)accessor.Capacity];
+      accessor.SafeMemoryMappedViewHandle.ReadSpan(0, bytes);
+      var endIdx = bytes.IndexOf(Convert.ToByte('\x00'));
+      return Encoding.ASCII.GetString(bytes[..endIdx]);
+    }
+    catch (FileNotFoundException)
+    {
+      return string.Empty;
+    }
   }
 
   private static string? ReadNodeText(XmlNode node, string xPath) => node.SelectSingleNode(xPath)?.InnerText.Trim();
