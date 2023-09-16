@@ -1,4 +1,4 @@
-using AIDA64.Reader;
+using AIDA64.Readers;
 
 namespace AIDA64.Tests;
 

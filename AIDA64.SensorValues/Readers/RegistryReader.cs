@@ -3,7 +3,7 @@ using System.Linq;
 using AIDA64.Model;
 using Microsoft.Win32;
 
-namespace AIDA64.Reader;
+namespace AIDA64.Readers;
 
 /// <summary>
 /// Reads the sensor values shared by Aida64 from the registry 

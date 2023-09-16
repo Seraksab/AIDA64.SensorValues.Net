@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using AIDA64.Model;
 
-namespace AIDA64.Reader;
+namespace AIDA64.Readers;
 
 /// <summary>
 /// Reads the sensor values shared by Aida64 from shared memory

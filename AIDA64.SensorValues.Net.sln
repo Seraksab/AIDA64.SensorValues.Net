@@ -6,9 +6,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{800039C6-CB4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A171009E-35F6-4D37-9926-ADF2923A4049}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDA64.Tests", "AIDA64.Tests\AIDA64.Tests.csproj", "{9192A0CE-E091-4E60-95A5-21DC25132276}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{9192A0CE-E091-4E60-95A5-21DC25132276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDA64.Benchmark", "AIDA64.Benchmark\AIDA64.Benchmark.csproj", "{7014C4CF-0C2C-4930-9E49-9BF30C8B1393}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{7014C4CF-0C2C-4930-9E49-9BF30C8B1393}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

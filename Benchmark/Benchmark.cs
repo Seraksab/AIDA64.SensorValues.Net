@@ -1,5 +1,5 @@
 ﻿using AIDA64.Model;
-using AIDA64.Reader;
+using AIDA64.Readers;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 
