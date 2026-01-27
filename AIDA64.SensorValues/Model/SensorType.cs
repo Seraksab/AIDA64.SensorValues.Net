@@ -1,7 +1,7 @@
 ﻿namespace AIDA64.Model;
 
 /// <summary>
-/// The type of a sensor
+/// The type of sensor
 /// </summary>
 public enum SensorType
 {
