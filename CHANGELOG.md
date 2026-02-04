@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored readers to improve performance and reduce memory allocations
 - Updated to target framework net10.0
 - Updated dependencies
 

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using AIDA64.Model;
 using Microsoft.Win32;
 
@@ -12,25 +12,48 @@ public class RegistryReader : ISensorValueReader
 {
   private const string RegistryPath = @"Software\FinalWire\AIDA64\SensorValues";
 
+  private RegistryKey? _mainKey;
+
   /// <inheritdoc />
   public IEnumerable<SensorValue> Read()
   {
-    using var mainKey = Registry.CurrentUser.OpenSubKey(RegistryPath);
-    if (mainKey == null) yield break;
+    _mainKey ??= Registry.CurrentUser.OpenSubKey(RegistryPath);
+    if (_mainKey == null) yield break;
 
-    foreach (var valueName in mainKey.GetValueNames().Where(e => e.StartsWith("Label")))
+    var valueNames = _mainKey.GetValueNames();
+    var labels = new Dictionary<string, string>(StringComparer.Ordinal);
+    var values = new Dictionary<string, string>(StringComparer.Ordinal);
+
+    foreach (var name in valueNames)
     {
-      var splitName = valueName.Split('.');
-      if (splitName.Length != 2 || string.IsNullOrWhiteSpace(splitName[1])) continue;
+      if (name.StartsWith("Label."))
+      {
+        var id = name[6..];
+        labels[id] = _mainKey.GetValue(name) as string ?? string.Empty;
+      }
+      else if (name.StartsWith("Value."))
+      {
+        var id = name[6..];
+        values[id] = _mainKey.GetValue(name) as string ?? string.Empty;
+      }
+    }
 
-      var id = splitName[1];
+    foreach (var (id, value) in labels)
+    {
       yield return new SensorValue(
         Id: id,
-        Label: Registry.GetValue(mainKey.Name, $"Label.{id}", string.Empty) as string ?? string.Empty,
-        Value: Registry.GetValue(mainKey.Name, $"Value.{id}", string.Empty) as string ?? string.Empty,
+        Label: value,
+        Value: values.GetValueOrDefault(id, string.Empty),
         Type: SensorTypeFromTypeChar(id[0])
       );
     }
+  }
+
+  /// <inheritdoc />
+  public void Dispose()
+  {
+    _mainKey?.Dispose();
+    GC.SuppressFinalize(this);
   }
 
   private static SensorType SensorTypeFromTypeChar(char type) => type switch
