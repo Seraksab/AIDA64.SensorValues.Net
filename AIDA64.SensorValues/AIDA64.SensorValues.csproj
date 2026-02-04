@@ -19,6 +19,7 @@
         <RepositoryUrl>https://github.com/Seraksab/AIDA64.SensorValues.Net</RepositoryUrl>
         <PackageTags>Aida,AIDA64,AIDA64 Extreme</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AIDA64.Model;
 
 namespace AIDA64;
@@ -6,7 +7,7 @@ namespace AIDA64;
 /// <summary>
 /// Reader to access the sensor values shared by Aida64
 /// </summary>
-public interface ISensorValueReader
+public interface ISensorValueReader : IDisposable
 {
   /// <summary>
   /// Reads the sensor values

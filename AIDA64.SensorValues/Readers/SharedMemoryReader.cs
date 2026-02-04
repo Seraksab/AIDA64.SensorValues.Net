@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Text;
 using System.Xml;
 using AIDA64.Model;
 
@@ -15,60 +14,127 @@ public class SharedMemoryReader : ISensorValueReader
 {
   private const string SharedMemoryFile = "AIDA64_SensorValues";
 
+  private MemoryMappedFile? _mmf;
+  private MemoryMappedViewAccessor? _accessor;
+
   /// <inheritdoc />
   public IEnumerable<SensorValue> Read()
   {
-    var content = ReadSharedMemory();
-    if (string.IsNullOrEmpty(content)) yield break;
+    if (!TryGetAccessor(out var accessor)) yield break;
 
-    var xmlDoc = new XmlDocument();
-    xmlDoc.LoadXml($"<root>{content}</root>");
-
-    if (xmlDoc.FirstChild == null) yield break;
-
-    foreach (XmlNode node in xmlDoc.FirstChild.ChildNodes)
+    var capacity = (int)accessor.Capacity;
+    int length;
+    unsafe
     {
-      var id = ReadNodeText(node, "id");
-      if (id == null) continue;
+      byte* ptr = null;
+      accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
+      try
+      {
+        ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(ptr, capacity);
+        int nullIdx = span.IndexOf((byte)0);
+        length = nullIdx == -1 ? capacity : nullIdx;
+      }
+      finally
+      {
+        accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+      }
+    }
 
-      yield return new SensorValue(
-        Id: id,
-        Label: ReadNodeText(node, "label") ?? string.Empty,
-        Value: ReadNodeText(node, "value") ?? string.Empty,
-        Type: SensorTypeFromString(node.Name)
-      );
+    if (length == 0) yield break;
+
+    using var stream = _mmf!.CreateViewStream(0, length, MemoryMappedFileAccess.Read);
+    using var reader = XmlReader.Create(stream, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
+
+    while (reader.Read())
+    {
+      if (reader.NodeType != XmlNodeType.Element) continue;
+
+      var typeName = reader.Name;
+      var sensorType = SensorTypeFromString(typeName);
+
+      string? id = null;
+      string? label = null;
+      string? value = null;
+
+      using var subReader = reader.ReadSubtree();
+      while (subReader.Read())
+      {
+        if (subReader.NodeType != XmlNodeType.Element) continue;
+        var elementName = subReader.Name;
+        switch (elementName)
+        {
+          case "id":
+            subReader.Read();
+            id = subReader.Value;
+            break;
+          case "label":
+            subReader.Read();
+            label = subReader.Value;
+            break;
+          case "value":
+            subReader.Read();
+            value = subReader.Value;
+            break;
+        }
+      }
+
+      if (id != null)
+      {
+        yield return new SensorValue(
+          Id: id,
+          Label: label ?? string.Empty,
+          Value: value ?? string.Empty,
+          Type: sensorType
+        );
+      }
     }
   }
 
-  private static string ReadSharedMemory()
+  /// <inheritdoc />
+  public void Dispose()
   {
+    _accessor?.Dispose();
+    _mmf?.Dispose();
+    GC.SuppressFinalize(this);
+  }
+
+  private bool TryGetAccessor(out MemoryMappedViewAccessor accessor)
+  {
+    if (_accessor != null)
+    {
+      accessor = _accessor;
+      return true;
+    }
+
     try
     {
-      using var mmf = MemoryMappedFile.OpenExisting(SharedMemoryFile, MemoryMappedFileRights.Read);
-      using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
-      Span<byte> bytes = stackalloc byte[(int)accessor.Capacity];
-      accessor.SafeMemoryMappedViewHandle.ReadSpan(0, bytes);
-      var endIdx = bytes.IndexOf(Convert.ToByte('\x00'));
-      return Encoding.ASCII.GetString(bytes[..endIdx]);
+      _mmf = MemoryMappedFile.OpenExisting(SharedMemoryFile, MemoryMappedFileRights.Read);
+      _accessor = _mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
+      accessor = _accessor;
+      return true;
     }
     catch (FileNotFoundException)
     {
-      return string.Empty;
+      accessor = null!;
+      return false;
     }
   }
 
-  private static string? ReadNodeText(XmlNode node, string xPath) => node.SelectSingleNode(xPath)?.InnerText.Trim();
-
-  private static SensorType SensorTypeFromString(string type) => type.Trim().ToLowerInvariant() switch
+  private static SensorType SensorTypeFromString(string type)
   {
-    "sys" => SensorType.System,
-    "fan" => SensorType.CoolingFan,
-    "duty" => SensorType.FanSpeed,
-    "temp" => SensorType.Temperature,
-    "volt" => SensorType.Voltage,
-    "curr" => SensorType.Current,
-    "pwr" => SensorType.Power,
-    "flow" => SensorType.WaterFlow,
-    _ => SensorType.Unknown
-  };
+    if (type.Length == 0) return SensorType.Unknown;
+
+    return type switch
+    {
+      "sys" => SensorType.System,
+      "fan" => SensorType.CoolingFan,
+      "duty" => SensorType.FanSpeed,
+      "temp" => SensorType.Temperature,
+      "volt" => SensorType.Voltage,
+      "curr" => SensorType.Current,
+      "pwr" => SensorType.Power,
+      "flow" => SensorType.WaterFlow,
+      _ => SensorType.Unknown
+    };
+  }
 }
